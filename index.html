@@ -62,23 +62,23 @@
     }
 
     document.querySelector('.add-btn').addEventListener('click', function() {
-    let taskTitle = prompt("Enter task title:");
-    let pageId = prompt("Enter page ID:"); // You can set a default or fetch dynamically
+        let taskTitle = prompt("Enter task title:");
+        let pageId = prompt("Enter page ID:"); // You can set a default or fetch dynamically
 
-    if (taskTitle && pageId) {
-        fetch('add_task.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `title=${encodeURIComponent(taskTitle)}&page_id=${encodeURIComponent(pageId)}`
-        })
-        .then(response => response.text())
-        .then(result => {
-            console.log(result);
-            fetchTasks();  // Refresh task list
-        })
-        .catch(error => console.error('Error adding task:', error));
-    }
-});
+        if (taskTitle && pageId) {
+            fetch('add_task.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `title=${encodeURIComponent(taskTitle)}&page_id=${encodeURIComponent(pageId)}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                console.log(result);
+                fetchTasks();  // Refresh task list
+            })
+            .catch(error => console.error('Error adding task:', error));
+        }
+    });
 
     document.querySelector('.logout').addEventListener('click', function() {
         fetch('logout.php', {
