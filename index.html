@@ -11,112 +11,82 @@
         <!-- الشريط الجانبي -->
         <aside class="sidebar">
             <h2>TO DO LIST</h2>
-            <ul id="page-list">
-                <!-- Pages (lists) will be loaded dynamically here -->
+            <ul>
+                <li><span>👤</span> Profile</li>
+                <li><span>👥</span> Users</li>
+                <li><span>📁</span> Tasks</li>
+                <li><span>📆</span> Lists</li>
             </ul>
-            <button class="add-page">➕ Add List</button>
             <button class="logout">⬅ Log out</button>
         </aside>
 
         <!-- المحتوى الرئيسي -->
         <main class="main-content">
-            <h2 id="current-page-title">Select a List</h2>
+            <!-- شريط البحث -->
+            <header>
+                <input type="text" placeholder="Search" class="search-bar">
+                <button class="edit-btn">✎</button>
+            </header>
+
+            <!-- قائمة المهام -->
             <section class="task-list"></section>
-            <button class="add-task" style="display: none;">➕ Add Task</button>
+            
+            <!-- زر الإضافة -->
+            <button class="add-btn">+</button>
         </main>
     </div>
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        fetchPages();
+        fetchTasks();
     });
 
-    let currentPageId = null;
-
-    // Fetch pages (lists) from the database
-    function fetchPages() {
-        fetch("get_lists.php")
+    function fetchTasks() {
+        fetch('get_tasks.php')
         .then(response => response.json())
         .then(data => {
-            let pageList = document.querySelector("#page-list");
-            pageList.innerHTML = ""; // Clear existing lists
-            data.forEach(page => {
-                let li = document.createElement("li");
-                li.textContent = page.title;
-                li.dataset.pageId = page.idx;
-                li.addEventListener("click", function() {
-                    currentPageId = this.dataset.pageId;
-                    document.querySelector("#current-page-title").textContent = page.title;
-                    document.querySelector(".add-task").style.display = "block";
-                    fetchTasks(currentPageId);
-                });
-                pageList.appendChild(li);
-            });
-        })
-        .catch(error => console.error("Error fetching lists:", error));
-    }
-
-    // Fetch tasks for a selected list
-    function fetchTasks(pageId) {
-        fetch(`get_tasks.php?page_id=${pageId}`)
-        .then(response => response.json())
-        .then(data => {
-            let taskList = document.querySelector(".task-list");
-            taskList.innerHTML = ""; // Clear existing tasks
+            let taskList = document.querySelector('.task-list');
+            taskList.innerHTML = '';  // Clear existing tasks
             data.forEach(task => {
-                let taskDiv = document.createElement("div");
-                taskDiv.className = "task blue";
+                let taskDiv = document.createElement('div');
+                taskDiv.className = 'task blue';
                 taskDiv.innerHTML = `<span class="pin">📌</span>
                                      <h3>${task.title}</h3>
-                                     <p>${task.description || ''}</p>`;
+                                     <ul>
+                                         <li>${task.description}</li>
+                                     </ul>`;
                 taskList.appendChild(taskDiv);
             });
         })
-        .catch(error => console.error("Error fetching tasks:", error));
+        .catch(error => console.error('Error fetching tasks:', error));
     }
 
-    // Add a new list (page)
-    document.querySelector(".add-page").addEventListener("click", function() {
-        let listTitle = prompt("Enter new list title:");
-        if (listTitle) {
-            fetch("add_list.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `title=${encodeURIComponent(listTitle)}`
-            })
-            .then(response => response.json())
-            .then(() => fetchPages()) // Refresh page list
-            .catch(error => console.error("Error adding list:", error));
-        }
-    });
+    document.querySelector('.add-btn').addEventListener('click', function() {
+    let taskTitle = prompt("Enter task title:");
+    let pageId = prompt("Enter page ID:"); // You can set a default or fetch dynamically
 
-    // Add a new task to the selected list
-    document.querySelector(".add-task").addEventListener("click", function() {
-        if (!currentPageId) {
-            alert("Please select a list first.");
-            return;
-        }
-        let taskTitle = prompt("Enter task title:");
-        if (taskTitle) {
-            fetch("add_task.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `page_id=${encodeURIComponent(currentPageId)}&title=${encodeURIComponent(taskTitle)}`
-            })
-            .then(response => response.json())
-            .then(() => fetchTasks(currentPageId)) // Refresh task list
-            .catch(error => console.error("Error adding task:", error));
-        }
-    });
-
-    // Logout function
-    document.querySelector(".logout").addEventListener("click", function() {
-        fetch("logout.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    if (taskTitle && pageId) {
+        fetch('add_task.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `title=${encodeURIComponent(taskTitle)}&page_id=${encodeURIComponent(pageId)}`
         })
-        .then(() => window.location.href = "login.html")
-        .catch(error => console.error("Error logging out:", error));
+        .then(response => response.text())
+        .then(result => {
+            console.log(result);
+            fetchTasks();  // Refresh task list
+        })
+        .catch(error => console.error('Error adding task:', error));
+    }
+});
+
+    document.querySelector('.logout').addEventListener('click', function() {
+        fetch('logout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        .then(() => window.location.href = 'login.html')
+        .catch(error => console.error('Error logging out:', error));
     });
     </script>
 </body>
